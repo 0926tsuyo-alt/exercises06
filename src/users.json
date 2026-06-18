@@ -1,0 +1,102 @@
+{
+  "michael@mergington.edu": {
+    "name": "Michael",
+    "password": "student123",
+    "role": "student"
+  },
+  "daniel@mergington.edu": {
+    "name": "Daniel",
+    "password": "student123",
+    "role": "student"
+  },
+  "emma@mergington.edu": {
+    "name": "Emma",
+    "password": "student123",
+    "role": "student"
+  },
+  "sophia@mergington.edu": {
+    "name": "Sophia",
+    "password": "student123",
+    "role": "student"
+  },
+  "john@mergington.edu": {
+    "name": "John",
+    "password": "student123",
+    "role": "student"
+  },
+  "olivia@mergington.edu": {
+    "name": "Olivia",
+    "password": "student123",
+    "role": "student"
+  },
+  "liam@mergington.edu": {
+    "name": "Liam",
+    "password": "student123",
+    "role": "student"
+  },
+  "noah@mergington.edu": {
+    "name": "Noah",
+    "password": "student123",
+    "role": "student"
+  },
+  "ava@mergington.edu": {
+    "name": "Ava",
+    "password": "student123",
+    "role": "student"
+  },
+  "mia@mergington.edu": {
+    "name": "Mia",
+    "password": "student123",
+    "role": "student"
+  },
+  "amelia@mergington.edu": {
+    "name": "Amelia",
+    "password": "student123",
+    "role": "student"
+  },
+  "harper@mergington.edu": {
+    "name": "Harper",
+    "password": "student123",
+    "role": "student"
+  },
+  "ella@mergington.edu": {
+    "name": "Ella",
+    "password": "student123",
+    "role": "student"
+  },
+  "scarlett@mergington.edu": {
+    "name": "Scarlett",
+    "password": "student123",
+    "role": "student"
+  },
+  "james@mergington.edu": {
+    "name": "James",
+    "password": "student123",
+    "role": "student"
+  },
+  "benjamin@mergington.edu": {
+    "name": "Benjamin",
+    "password": "student123",
+    "role": "student"
+  },
+  "charlotte@mergington.edu": {
+    "name": "Charlotte",
+    "password": "student123",
+    "role": "student"
+  },
+  "henry@mergington.edu": {
+    "name": "Henry",
+    "password": "student123",
+    "role": "student"
+  },
+  "teacher1@mergington.edu": {
+    "name": "Ms. Parker",
+    "password": "teacher123",
+    "role": "teacher"
+  },
+  "hod1@mergington.edu": {
+    "name": "Mr. Carter",
+    "password": "hod123",
+    "role": "hod"
+  }
+}

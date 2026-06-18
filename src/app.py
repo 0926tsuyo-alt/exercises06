@@ -5,11 +5,14 @@ A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
 """
 
-from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+import json
+import secrets
 import os
 from pathlib import Path
+from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -18,6 +21,137 @@ app = FastAPI(title="Mergington High School API",
 current_dir = Path(__file__).parent
 app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
           "static")), name="static")
+
+# Authentication setup
+security = HTTPBasic()
+
+def load_users():
+    with current_dir.joinpath("users.json").open("r", encoding="utf-8") as file:
+        return json.load(file)
+
+users = load_users()
+
+
+def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    user_email = credentials.username
+    user_password = credentials.password
+
+    if user_email not in users:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    user_record = users[user_email]
+    if not secrets.compare_digest(user_record["password"], user_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    return {"email": user_email, **user_record}
+
+
+def require_role(user, allowed_roles):
+    if user["role"] not in allowed_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied for this role",
+        )
+
+
+@app.get("/dashboard")
+def dashboard(user: dict = Depends(get_current_user)):
+    if user["role"] == "student":
+        enrolled = [
+            {
+                "activity_name": name,
+                "schedule": details["schedule"],
+                "participants": details["participants"],
+            }
+            for name, details in activities.items()
+            if user["email"] in details["participants"]
+        ]
+
+        available = [
+            {
+                "activity_name": name,
+                "description": details["description"],
+                "schedule": details["schedule"],
+                "spots_left": details["max_participants"] - len(details["participants"]),
+            }
+            for name, details in activities.items()
+            if user["email"] not in details["participants"]
+        ]
+
+        return {
+            "role": "student",
+            "name": user["name"],
+            "enrolled_activities": enrolled,
+            "available_activities": available,
+        }
+
+    if user["role"] == "teacher":
+        return {
+            "role": "teacher",
+            "name": user["name"],
+            "activities": [
+                {
+                    "activity_name": name,
+                    "description": details["description"],
+                    "schedule": details["schedule"],
+                    "max_participants": details["max_participants"],
+                    "current_participants": len(details["participants"]),
+                    "participants": details["participants"],
+                }
+                for name, details in activities.items()
+            ],
+        }
+
+    if user["role"] == "hod":
+        activity_summary = [
+            {
+                "activity_name": name,
+                "schedule": details["schedule"],
+                "participants": details["participants"],
+                "max_participants": details["max_participants"],
+            }
+            for name, details in activities.items()
+        ]
+        return {
+            "role": "hod",
+            "name": user["name"],
+            "total_activities": len(activities),
+            "total_students_signed_up": sum(
+                len(details["participants"]) for details in activities.values()
+            ),
+            "activity_summary": activity_summary,
+        }
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Unknown role",
+    )
+
+
+@app.get("/dashboard/student")
+def student_dashboard(user: dict = Depends(get_current_user)):
+    require_role(user, ["student"])
+    return dashboard(user)
+
+
+@app.get("/dashboard/teacher")
+def teacher_dashboard(user: dict = Depends(get_current_user)):
+    require_role(user, ["teacher"])
+    return dashboard(user)
+
+
+@app.get("/dashboard/hod")
+def hod_dashboard(user: dict = Depends(get_current_user)):
+    require_role(user, ["hod"])
+    return dashboard(user)
 
 # In-memory activity database
 activities = {
